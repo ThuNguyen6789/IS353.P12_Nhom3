@@ -1,20 +1,94 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Prediction Form</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dự đoán kết quả học tập</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>Enter Data for Prediction</h1>
-    <form action="/predict" method="POST">
-        <label for="dtbhk_truoc">dtbhk_truoc:</label>
-        <input type="text" name="dtbhk_truoc" required><br>
-        <label for="drltl">drltl:</label>
-        <input type="text" name="drltl" required><br>
-        <label for="sotchk">sotchk:</label>
-        <input type="text" name="sotchk" required><br>
-        <label for="namhoc">namhoc:</label>
-        <input type="text" name="namhoc" required><br>
-        <button type="submit">Submit</button>
-    </form>
+    <div class="container mt-5">
+        <h1 id="result" class="text-center mb-4">Dự đoán kết quả xếp loại học kỳ tiếp theo của bạn</h1>
+        <form id="prediction-form">
+            <div class="mb-3">
+                <label for="dtbhk_truoc" class="form-label">Điểm trung bình học kỳ của bạn:</label>
+                <input type="text" class="form-control" name="dtbhk_truoc" required>
+            </div>
+            <div class="mb-3">
+                <label for="drltl" class="form-label">Điểm rèn luyện tích lũy:</label>
+                <input type="text" class="form-control" name="drltl" required>
+            </div>
+            <div class="mb-3">
+                <label for="sotchk" class="form-label">Số tín chỉ:</label>
+                <input type="text" class="form-control" name="sotchk" required>
+            </div>
+            <div class="mb-3">
+                <label for="namhoc" class="form-label">Năm học:</label>
+                <input type="text" class="form-control" name="namhoc" required>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Dự đoán</button>
+            </div>
+        </form>
+
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $('#prediction-form').on('submit', function(event){
+                event.preventDefault(); 
+                var dtbhk_truoc = parseFloat($('input[name="dtbhk_truoc"]').val());
+                var drltl = parseFloat($('input[name="drltl"]').val());
+                var sotchk = parseInt($('input[name="sotchk"]').val());
+                var namhoc = $('input[name="namhoc"]').val();
+
+                if (isNaN(dtbhk_truoc) || isNaN(drltl) || isNaN(sotchk) || dtbhk_truoc < 0 || drltl < 0 || sotchk < 0) {
+                    alert("Vui lòng nhập các giá trị hợp lệ.");
+                    return;
+                }
+
+                var drltl_tmp;
+                if (drltl < 35) {
+                    drltl_tmp = 0;
+                } else if (drltl < 50) {
+                    drltl_tmp = 1;
+                } else if (drltl < 65) {
+                    drltl_tmp = 2;
+                } else if (drltl < 80) {
+                    drltl_tmp = 3;
+                } else if (drltl < 90) {
+                    drltl_tmp = 4;
+                } else {
+                    drltl_tmp = 5;
+                }
+
+                var formData = {
+                    dtbhk_truoc: dtbhk_truoc,
+                    drltl: drltl_tmp,
+                    sotchk: sotchk,
+                    namhoc: namhoc
+                };
+
+                $.ajax({
+                    url: '/predict',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response){
+                        let kqmap = {
+                            4: "Giỏi <br> <h4>Bạn đang làm rất tốt! Hãy giữ vững phong độ và luôn sẵn sàng học hỏi thêm. Thành công lớn đang chờ bạn phía trước!</h4>",
+                            3: "Khá <br> <h4>Bạn đã tiến xa rồi, và chỉ cần một chút nỗ lực nữa, bạn sẽ đạt đến trình độ cao hơn. Cố gắng lên nhé, bạn hoàn toàn có thể làm được!</h4>",
+                            2: "Trung Bình <br> <h4>Không ai giỏi ngay từ đầu, mọi thành công đều bắt nguồn từ sự kiên trì. Bạn có thể làm được, chỉ cần không bỏ cuộc!</h4>",
+                            1: "Yếu <br> <h4>Khó khăn chỉ là tạm thời. Chỉ cần bạn cố gắng từng chút một, bạn sẽ thấy mình thay đổi tích cực. Cứ tin vào bản thân, bạn không hề cô đơn!</h4>"
+                        };
+                        $('#result').html('<p>Kết quả dự đoán xếp loại học kỳ tiếp theo của bạn là ' + kqmap[response.prediction] + '</p>');
+                    },
+                    error: function(error){
+                        console.log(error);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
