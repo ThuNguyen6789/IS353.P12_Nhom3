@@ -24,10 +24,11 @@ def train_model(data_path='data/processed.csv', save_path='src/model.pkl'):
     print(f"Test data shape: X_test: {X_test.shape}, y_test: {y_test.shape}")
     
     params = {
-        'max_depth': 7,
         'n_estimators': 200,
-        'colsample_bytree': 1.0,
-        'subsample': 0.9,
+        'max_depth': None,
+        'min_samples_split': 2,
+        'min_samples_leaf': 1,
+        'bootstrap': False
     }
     print(f"Model hyperparameters: {params}")
 

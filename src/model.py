@@ -1,4 +1,4 @@
-from xgboost import XGBClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 def create_model(params):
-    return XGBClassifier(**params, random_state=42)
+    return RandomForestClassifier(**params, random_state=42)
